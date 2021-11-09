@@ -38,37 +38,45 @@ defmodule Geolocation.Parse do
     |> Flow.filter(fn [h1 | _tail] ->
       :inet.parse_address(to_charlist(h1)) != {:error, :einval}
     end)
-    |> Flow.map(fn [ip, cc, cou, city, lat, long, mys] ->
+    |> Flow.map(fn data ->
+      data = Enum.map(data, fn x -> if x == "", do: nil, else: x end)
+      [ip, cc, cou, city, lat, long, mys] = data
+
       case :ets.lookup(:ip, ip) do
-        [{^ip, _}] -> :ets.update_counter(:test, "counter", {2, 1}, {"counter", 0})
-        [] -> :ets.insert(:ip, {ip, 0})
+        [{^ip, _}] ->
+          :ets.update_counter(:test, "counter", {2, 1}, {"counter", 0})
+          nil
+
+        [] ->
+          :ets.insert(:ip, {ip, 0})
+
+          lat =
+            case parse_decimal(lat) do
+              {val, _} -> val
+              _ -> Decimal.from_float(0.0)
+            end
+
+          long =
+            case parse_decimal(long) do
+              {val, _} -> val
+              _ -> Decimal.from_float(0.0)
+            end
+
+          %{
+            id: Ecto.UUID.generate(),
+            ip_address: ip,
+            country_code: cc,
+            country: cou,
+            city: city,
+            latitude: lat,
+            longitude: long,
+            mystery_value: mys,
+            inserted_at: DateTime.utc_now(),
+            updated_at: DateTime.utc_now()
+          }
       end
-
-      lat =
-        case Decimal.parse(lat) do
-          {val, _} -> val
-          _ -> Decimal.from_float(0.0)
-        end
-
-      long =
-        case Decimal.parse(long) do
-          {val, _} -> val
-          _ -> Decimal.from_float(0.0)
-        end
-
-      %{
-        id: Ecto.UUID.generate(),
-        ip_address: ip,
-        country_code: cc,
-        country: cou,
-        city: city,
-        latitude: lat,
-        longitude: long,
-        mystery_value: mys,
-        inserted_at: DateTime.utc_now(),
-        updated_at: DateTime.utc_now()
-      }
     end)
+    |> Flow.filter(fn x -> not is_nil(x) end)
     |> Flow.reduce(fn -> [] end, fn event, acc -> [event | acc] end)
     |> Flow.on_trigger(fn x ->
       Geolocation.Repo.insert_all(GeoData, x)
@@ -77,6 +85,12 @@ defmodule Geolocation.Parse do
     end)
     |> Enum.to_list()
   end
-end
 
-# :timer.tc(&Geolocation.Parse.nimble_csv_flow/0)
+  def parse_decimal(nil) do
+    {nil, ""}
+  end
+
+  def parse_decimal(val) do
+    Decimal.parse(val)
+  end
+end

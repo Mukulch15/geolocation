@@ -15,9 +15,9 @@ defmodule GeolocationWeb.Router do
   end
 
   scope "/", GeolocationWeb do
-    pipe_through :browser
+    pipe_through :api
 
-    get "/", PageController, :index
+    get "/geo_data", GeodataController, :show
   end
 
   # Other scopes may use custom stacks.

@@ -10,6 +10,14 @@ import Config
 config :geolocation,
   ecto_repos: [Geolocation.Repo]
 
+config :geolocation, Geolocation.Repo,
+  username: "postgres",
+  password: "postgres",
+  database: "geolocation_dev",
+  hostname: "localhost",
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
 # Configures the endpoint
 config :geolocation, GeolocationWeb.Endpoint,
   url: [host: "localhost"],
