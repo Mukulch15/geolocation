@@ -40,17 +40,4 @@ defmodule Geolocation do
       {:ok, _ip} -> true
     end
   end
-
-  # defp parse_ip({a,b,c,d}) do
-  #   "#{a}.#{b}.#{c}.#{d}"
-  # end
-
-  # defp parse_ip({a,b,c,d,e,f,g,h}) do
-  #   [a,b,c,d,e,f,g,h]
-  #   |>Enum.map(fn x ->
-  #     x
-  #     |> Integer.to_string(16)
-  #     |> String.downcase()
-  #   end)
-  # end
 end
