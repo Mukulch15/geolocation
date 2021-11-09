@@ -35,6 +35,9 @@ config :geolocation, GeolocationWeb.Endpoint,
 config :geolocation, Geolocation.Mailer, adapter: Swoosh.Adapters.Local
 config :geolocation, Geolocation.Repo, migration_primary_key: [name: :id, type: :binary_id]
 
+config :geolocation,
+  csv_path: System.fetch_env!("CSV_PATH")
+
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false
 

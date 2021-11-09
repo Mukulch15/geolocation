@@ -1,4 +1,5 @@
 defmodule Geolocation.Parse do
+  alias Geolocation.EtsOwnerServer
   alias Geolocation.Schema.GeoData
 
   @moduledoc """
@@ -8,9 +9,8 @@ defmodule Geolocation.Parse do
   Contexts are also responsible for managing your data, regardless
   if it comes from the database, an external API or others.
   """
-  @path "/Users/mukul/Downloads/data_dump.csv"
   alias NimbleCSV.RFC4180
-  # NimbleCSV.define(MyParser, separator: "\t", escape: "\"")
+
   def csv_module() do
     @path
     |> Path.expand(__DIR__)
@@ -27,28 +27,29 @@ defmodule Geolocation.Parse do
   end
 
   def nimble_csv_flow() do
-    :ets.new(:test, [:named_table, :set, :public])
-    :ets.new(:ip, [:named_table, :set, :public])
     window = Flow.Window.count(2000)
+    path = Application.fetch_env!(:geolocation, :csv_path)
 
-    @path
+    path
     |> File.stream!()
     |> RFC4180.parse_stream()
     |> Flow.from_enumerable(window: window)
     |> Flow.filter(fn [h1 | _tail] ->
-      :inet.parse_address(to_charlist(h1)) != {:error, :einval}
+      val = :inet.parse_address(to_charlist(h1))
+      if val == {:error, :einval}, do: GenServer.call(EtsOwnerServer, :incr_rejected)
+      val != {:error, :einval}
     end)
     |> Flow.map(fn data ->
       data = Enum.map(data, fn x -> if x == "", do: nil, else: x end)
       [ip, cc, cou, city, lat, long, mys] = data
 
-      case :ets.lookup(:ip, ip) do
+      case GenServer.call(EtsOwnerServer, {:lookup_ip, ip}) do
         [{^ip, _}] ->
-          :ets.update_counter(:test, "counter", {2, 1}, {"counter", 0})
+          GenServer.call(EtsOwnerServer, :incr_rejected)
           nil
 
         [] ->
-          :ets.insert(:ip, {ip, 0})
+          GenServer.call(EtsOwnerServer, {:insert_ip, ip, 0})
 
           lat =
             case parse_decimal(lat) do

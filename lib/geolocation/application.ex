@@ -15,7 +15,8 @@ defmodule Geolocation.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Geolocation.PubSub},
       # Start the Endpoint (http/https)
-      GeolocationWeb.Endpoint
+      GeolocationWeb.Endpoint,
+      {Geolocation.EtsOwnerServer, []}
       # Start a worker by calling: Geolocation.Worker.start_link(arg)
       # {Geolocation.Worker, arg}
     ]
