@@ -11,22 +11,7 @@ defmodule Geolocation.Parse do
   """
   alias NimbleCSV.RFC4180
 
-  def csv_module() do
-    @path
-    |> Path.expand(__DIR__)
-    |> File.stream!()
-    |> CSV.decode(num_workers: System.schedulers_online())
-    |> Enum.to_list()
-  end
-
-  def nimble_csv() do
-    @path
-    |> File.stream!()
-    |> RFC4180.parse_stream()
-    |> Enum.map(fn [h1 | [h2 | _t]] -> h1 <> h2 end)
-  end
-
-  def nimble_csv_flow() do
+  def parse_csv() do
     window = Flow.Window.count(2000)
     path = Application.fetch_env!(:geolocation, :csv_path)
 
@@ -34,13 +19,25 @@ defmodule Geolocation.Parse do
     |> File.stream!()
     |> RFC4180.parse_stream()
     |> Flow.from_enumerable(window: window)
+    |> filter_ips()
+    |> create_structs()
+    |> remove_nil_rows()
+    |> combine_results()
+  end
+
+  defp filter_ips(flow) do
+    flow
     |> Flow.filter(fn [h1 | _tail] ->
       val = :inet.parse_address(to_charlist(h1))
       if val == {:error, :einval}, do: GenServer.call(EtsOwnerServer, :incr_rejected)
       val != {:error, :einval}
     end)
+  end
+
+  defp create_structs(flow) do
+    flow
     |> Flow.map(fn data ->
-      data = Enum.map(data, fn x -> if x == "", do: nil, else: x end)
+      data = convert_empty_to_nil(data)
       [ip, cc, cou, city, lat, long, mys] = data
 
       case GenServer.call(EtsOwnerServer, {:lookup_ip, ip}) do
@@ -51,33 +48,28 @@ defmodule Geolocation.Parse do
         [] ->
           GenServer.call(EtsOwnerServer, {:insert_ip, ip, 0})
 
-          lat =
-            case parse_decimal(lat) do
-              {val, _} -> val
-              _ -> Decimal.from_float(0.0)
-            end
-
-          long =
-            case parse_decimal(long) do
-              {val, _} -> val
-              _ -> Decimal.from_float(0.0)
-            end
-
           %{
             id: Ecto.UUID.generate(),
             ip_address: ip,
             country_code: cc,
             country: cou,
             city: city,
-            latitude: lat,
-            longitude: long,
+            latitude: parse_decimal(lat),
+            longitude: parse_decimal(long),
             mystery_value: mys,
             inserted_at: DateTime.utc_now(),
             updated_at: DateTime.utc_now()
           }
       end
     end)
-    |> Flow.filter(fn x -> not is_nil(x) end)
+  end
+
+  defp remove_nil_rows(flow) do
+    Flow.filter(flow, fn x -> not is_nil(x) end)
+  end
+
+  defp combine_results(flow) do
+    flow
     |> Flow.reduce(fn -> [] end, fn event, acc -> [event | acc] end)
     |> Flow.on_trigger(fn x ->
       Geolocation.Repo.insert_all(GeoData, x)
@@ -87,11 +79,18 @@ defmodule Geolocation.Parse do
     |> Enum.to_list()
   end
 
-  def parse_decimal(nil) do
-    {nil, ""}
+  defp parse_decimal(nil) do
+    nil
   end
 
-  def parse_decimal(val) do
-    Decimal.parse(val)
+  defp parse_decimal(val) do
+    {val, _} = Decimal.parse(val)
+    val
+  end
+
+  defp convert_empty_to_nil(lst) do
+    Enum.map(lst, fn x ->
+      if String.trim(x) == "", do: nil, else: x
+    end)
   end
 end
