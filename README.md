@@ -28,8 +28,10 @@ path
 |> Flow.from_enumerable()
 |> Stream.run()
 ```
-Average time taken for csv on Mac M1 with 8 cores -> 10 seconds
+Average time taken for csv on Mac M1 with 8 cores -> 10 seconds.
+
 Average Time taken for nimble_csv on Mac M1 with 8 cores -> 1.7 seconds.
+
 A benchmark was also run to decide between task and flow.
 Code using task:
 ```elixir
@@ -44,7 +46,10 @@ Code using task:
   end, async_options)
   |> Stream.run()
 ```
-Average time taken using task: 2.8 seconds. A chunk size of 10000 was found to be the sweet spot.
+Average time taken using task: 2.8 seconds. 
+
+A chunk size of 10000 was found to be the sweet spot.
+
 Hence it was decided that flow along with nimble_csv will not result in performant code but more understandable as well.
 
 To start your Phoenix server:
