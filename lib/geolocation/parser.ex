@@ -2,6 +2,8 @@ defmodule Geolocation.Parse do
   alias Geolocation.EtsOwnerServer
   alias Geolocation.Schema.GeoData
 
+  require Logger
+
   @moduledoc """
   Geolocation keeps the contexts that define your domain
   and business logic.
@@ -10,6 +12,18 @@ defmodule Geolocation.Parse do
   if it comes from the database, an external API or others.
   """
   alias NimbleCSV.RFC4180
+
+  def init_parse() do
+    GenServer.call(EtsOwnerServer, :reset)
+    {time, _} = :timer.tc(&parse_csv/0)
+    rejected = GenServer.call(EtsOwnerServer, :get_rejected_count)
+    accepted = GenServer.call(EtsOwnerServer, :get_accepted_count)
+    total = accepted + rejected
+
+    Logger.info(
+      "Time taken to parse #{time / 1_000_000} seconds \n Total: #{total} \n Rejected: #{rejected} \n Accepted: #{accepted}"
+    )
+  end
 
   def parse_csv() do
     window = Flow.Window.count(2000)
@@ -47,6 +61,7 @@ defmodule Geolocation.Parse do
 
         [] ->
           GenServer.call(EtsOwnerServer, {:insert_ip, ip, 0})
+          GenServer.call(EtsOwnerServer, :incr_accepted)
 
           %{
             id: Ecto.UUID.generate(),
@@ -84,8 +99,13 @@ defmodule Geolocation.Parse do
   end
 
   defp parse_decimal(val) do
-    {val, _} = Decimal.parse(val)
-    val
+    case Decimal.parse(val) do
+      {val, _} ->
+        val
+
+      _ ->
+        nil
+    end
   end
 
   defp convert_empty_to_nil(lst) do
