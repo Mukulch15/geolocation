@@ -8,6 +8,8 @@ The biggest benefit that I got from flow was that you could work with windows an
 Also initial benchmarks showed flow to be faster than `Task.async_stream`.
 I also had broadway in mind but that would have been an overkill, since we are not dealing with an event based system
 and are focussed more on data processing.
+For csv parsing I initially considered the CSV module. However when I benchmarked it with nimble_csv, nimble_csv was the clear
+winner with massive performance which further increased when I fed the resulting stream to flow.
 
 To start your Phoenix server:
 
