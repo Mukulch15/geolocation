@@ -11,25 +11,41 @@ and are focussed more on data processing.
 For csv parsing I initially considered the CSV module. However when I benchmarked it with nimble_csv, nimble_csv was the clear
 winner with massive performance which further increased when I fed the resulting stream to flow.
 Initial benchmarks (CSV vs nimble_csv) Both use flow for stream processing:
-Code for csv ->
+
+Code for csv:
 ```elixir
 File.stream!(path) 
 |> CSV.decode(num_workers: System.schedulers_online()) 
 |> Flow.from_enumerable() 
-|> Enum.to_list
+|> Stream.run()
 ```
 
-Code for nimble_csv ->
+Code for nimble_csv:
 ```elixir
 path
 |> File.stream!()
 |> RFC4180.parse_stream()
 |> Flow.from_enumerable()
-|> Enum.to_list()
+|> Stream.run()
 ```
-Time taken for csv on Mac M1 with 8 cores -> 13.7 seconds
-Time taken for nimble_csv on Mac M1 with 8 cores -> 5.7 seconds
+Average time taken for csv on Mac M1 with 8 cores -> 10 seconds
+Average Time taken for nimble_csv on Mac M1 with 8 cores -> 1.7 seconds.
+A benchmark was also run to decide between task and flow.
+Code using task:
+```elixir
+  async_options = [max_concurrency: 8, ordered: false]
 
+  path
+  |> File.stream!()
+  |> Stream.chunk_every(10000)
+  |> Task.async_stream(fn batch ->
+    batch
+    |> Enum.map(&RFC4180.parse_string/1)
+  end, async_options)
+  |> Stream.run()
+```
+Average time taken using task: 2.8 seconds. A chunk size of 10000 was found to be the sweet spot.
+Hence it was decided that flow along with nimble_csv will not result in performant code but more understandable as well.
 
 To start your Phoenix server:
 
