@@ -12,17 +12,21 @@ For csv parsing I initially considered the CSV module. However when I benchmarke
 winner with massive performance which further increased when I fed the resulting stream to flow.
 Initial benchmarks (CSV vs nimble_csv) Both use flow for stream processing:
 Code for csv ->
-```
-File.stream!(path) |> CSV.decode(num_workers: System.schedulers_online()) |> Flow.from_enumerable() |> Enum.to_list
+```elixir
+File.stream!(path) 
+|> CSV.decode(num_workers: System.schedulers_online()) 
+|> Flow.from_enumerable() 
+|> Enum.to_list
 ```
 
 Code for nimble_csv ->
-`path
+```elixir
+path
 |> File.stream!()
 |> RFC4180.parse_stream()
 |> Flow.from_enumerable()
 |> Enum.to_list()
-`
+```
 Time taken for csv on Mac M1 with 8 cores -> 13.7 seconds
 Time taken for nimble_csv on Mac M1 with 8 cores -> 5.7 seconds
 
