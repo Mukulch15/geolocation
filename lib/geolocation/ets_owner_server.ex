@@ -1,4 +1,10 @@
 defmodule Geolocation.EtsOwnerServer do
+  @moduledoc """
+  This genserver serves as an owner process for the ets table that we have used. Even though it leads to
+  a lot of additional code, I have decided to move forward with this approach because it provides us with
+  locality as to who control the ets tables. We can set up alerts and even have granular level of
+  control over the tables in the future.
+  """
   use GenServer
 
   def start_link(_) do

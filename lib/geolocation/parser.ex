@@ -5,14 +5,21 @@ defmodule Geolocation.Parse do
   require Logger
 
   @moduledoc """
-  Geolocation keeps the contexts that define your domain
-  and business logic.
+  This module consists of functions that handles parsing of the csv file. It uses flow to parallelize the parsing process
+  and get most out of the available cores. At the end of parsing it gives you the time taken, rejected count and total count.
 
-  Contexts are also responsible for managing your data, regardless
-  if it comes from the database, an external API or others.
+  1. The init_parse/0 function starts the parsing.
+  2. parse_csv/0 sets the window count(for batching of csv rows) and creates a csv stream using nimble_csv library. Then it is
+  fed to flow and afterwards to different functions for processing.
+  3. filter_ips/1 functions takes the flow and filters out the ip addresses that are invalid. It also increments the counter for ip
+  addresses that got rejected.
+  4. create_structs/1 function takes a flow.
   """
   alias NimbleCSV.RFC4180
 
+  @doc """
+   This function starts the parsing.
+  """
   def init_parse() do
     GenServer.call(EtsOwnerServer, :reset)
     {time, _} = :timer.tc(&parse_csv/0)
