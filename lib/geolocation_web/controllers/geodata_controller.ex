@@ -10,7 +10,7 @@ defmodule GeolocationWeb.GeodataController do
 
       :internal_server_error ->
         conn
-        |> put_status(:internal_server)
+        |> put_status(:internal_server_error)
         |> json(%{error: "Some error occurred"})
 
       data ->

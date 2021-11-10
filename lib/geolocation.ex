@@ -30,7 +30,7 @@ defmodule Geolocation do
         [] -> %{}
       end
     rescue
-      Ecto.QueryError -> :internal_server_error
+      _ -> :internal_server_error
     end
   end
 
