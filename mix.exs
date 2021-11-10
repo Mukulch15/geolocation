@@ -52,7 +52,8 @@ defmodule Geolocation.MixProject do
       {:nimble_csv, "~> 1.1"},
       {:csv, "~> 2.4"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:flow, "~> 1.0"}
+      {:flow, "~> 1.0"},
+      {:ex_machina, "~> 2.7.0"}
     ]
   end
 

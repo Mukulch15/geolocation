@@ -71,11 +71,7 @@ defmodule Geolocation.Parse do
           nil
 
         [] ->
-          GenServer.call(EtsOwnerServer, {:insert_ip, ip, 0})
-          GenServer.call(EtsOwnerServer, :incr_accepted)
-
-          %{
-            id: Ecto.UUID.generate(),
+          GeoData.changeset(%{
             ip_address: ip,
             country_code: cc,
             country: cou,
@@ -85,7 +81,8 @@ defmodule Geolocation.Parse do
             mystery_value: mys,
             inserted_at: DateTime.utc_now(),
             updated_at: DateTime.utc_now()
-          }
+          })
+          |> changeset_to_map()
       end
     end)
   end
@@ -123,5 +120,20 @@ defmodule Geolocation.Parse do
     Enum.map(lst, fn x ->
       if String.trim(x) == "", do: nil, else: x
     end)
+  end
+
+  # Changeset validation for map. After this final validation we add the ip into ets and also increment the accepted/rejected ip
+  defp changeset_to_map(changeset) do
+    case changeset do
+      %Ecto.Changeset{valid?: true} ->
+        changes = changeset.changes
+        GenServer.call(EtsOwnerServer, {:insert_ip, changes["ip_address"], 0})
+        GenServer.call(EtsOwnerServer, :incr_accepted)
+        changes
+
+      _ ->
+        GenServer.call(EtsOwnerServer, :incr_rejected)
+        nil
+    end
   end
 end

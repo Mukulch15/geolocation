@@ -19,9 +19,20 @@ defmodule Geolocation.Schema.GeoData do
     timestamps()
   end
 
+  @fields [
+    :ip_address,
+    :country_code,
+    :country,
+    :city,
+    :latitude,
+    :longitude,
+    :mystery_value,
+    :inserted_at,
+    :updated_at
+  ]
   def changeset(params) do
     %__MODULE__{}
-    |> cast(params, [:lane])
-    |> validate_required([:lane])
+    |> cast(params, @fields)
+    |> validate_required([:ip_address])
   end
 end
