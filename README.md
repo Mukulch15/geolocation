@@ -4,7 +4,9 @@ I have used flow library to process the csv files and insert the data into db.
 Initially I thought of using tasks to get the required parallelism but had to move to flow because of the following reasons.
 Flow allows us to divide the work into multiple stages wherein the data will be processed parallely according to available cores. Even though tasks allow us to parallelize any unit of work, but then it will lead to additional boiler plates 'cause 
 flow provided us with useful abstractions over genstage(like batching etc) that allows us to focus more on the logic and less on boiler plate.
+
 The biggest benefit that I got from flow was that you could work with windows and configure their size and once window size reaches the config limit a trigger event will occur on which can react and do some further processing. This was used to create batches.
+
 Also initial benchmarks showed flow to be faster than `Task.async_stream`.
 I also had broadway in mind but that would have been an overkill, since we are not dealing with an event based system
 and are focussed more on data processing.
