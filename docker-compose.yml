@@ -5,4 +5,24 @@ services:
     build:
       context: .
     environment:
-      - CSV_PATH=/Users/mukul/Downloads/data_dump.csv
+      - CSV_PATH=/app/data/data_dump.csv
+      - USER_NAME=postgres
+      - PASSWORD=postgres
+      - DATABASE=geolocation_dev
+      - HOSTNAME=host.docker.internal
+    ports:
+      - "4000:4000"
+    volumes:
+      - /Users/mukul/Downloads/:/app/data
+  db:
+      image: postgres:14.0
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+      ports:
+      - "5432:5432"
+      restart: always
+      volumes:
+        - /opt/homebrew/var/postgres/:/var/lib/postgresql/data
+
+                                                          

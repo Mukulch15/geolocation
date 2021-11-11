@@ -11,12 +11,15 @@ config :geolocation,
   ecto_repos: [Geolocation.Repo]
 
 config :geolocation, Geolocation.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "geolocation_dev",
-  hostname: "localhost",
+  username: System.fetch_env!("USER_NAME"),
+  password: System.fetch_env!("PASSWORD"),
+  database: System.fetch_env!("DATABASE"),
+  hostname: System.fetch_env!("HOSTNAME"),
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
+
+config :geolocation,
+  csv_path: System.fetch_env!("CSV_PATH")
 
 # Configures the endpoint
 config :geolocation, GeolocationWeb.Endpoint,

@@ -1,14 +1,18 @@
 import Config
 
 # Configure your database
-config :geolocation, Geolocation.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "geolocation_dev",
-  hostname: "localhost",
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+# config :geolocation, Geolocation.Repo,
+#   username: "postgres",
+#   password: "postgres",
+#   database: "geolocation_dev",
+#   port: "5432",
+#   hostname: "host.docker.internal",
+#   # hostname: "localhost",
+#   show_sensitive_data_on_connection_error: true,
+#   pool_size: 10
 
+# config :geolocation,
+#   csv_path: "/Users/mukul/Downloads/data_dump.csv"
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -18,7 +22,7 @@ config :geolocation, Geolocation.Repo,
 config :geolocation, GeolocationWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: {0, 0, 0, 0}, port: 4000],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
