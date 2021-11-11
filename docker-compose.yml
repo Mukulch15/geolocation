@@ -13,7 +13,7 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - /Users/mukul/Downloads/:/app/data
+      - /Users/mukul/Downloads/:/app/data:cached
   db:
       image: postgres:14.0
       environment:
@@ -23,6 +23,6 @@ services:
       - "5432:5432"
       restart: always
       volumes:
-        - /opt/homebrew/var/postgres/:/var/lib/postgresql/data
+        - /opt/homebrew/var/postgres/:/var/lib/postgresql/data:cached
 
                                                           

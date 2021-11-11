@@ -28,9 +28,10 @@ path
 |> Flow.from_enumerable()
 |> Stream.run()
 ```
-Average time taken for csv on Mac M1 with 8 cores -> 10 seconds.
+The following benchmarks were taken on M1 Mac 8 core and 8 GB RAM
+Average time taken for csv library -> 10 seconds.
 
-Average Time taken for nimble_csv on Mac M1 with 8 cores -> 1.7 seconds.
+Average Time taken for nimble_csv library> 1.7 seconds.
 
 A benchmark was also run to decide between task and flow.
 Code using task:
@@ -50,7 +51,15 @@ Average time taken using task: 2.8 seconds.
 
 A chunk size of 10000 was found to be the sweet spot.
 
-Hence it was decided that flow along with nimble_csv will not result in performant code but more understandable as well.
+Hence it was decided that flow along with nimble_csv will not only result in performant code but more understandable as well. 
+After including db insertions the entire flow took around 12-14 seconds.
+
+I have included a dockerfile and docker-compose file to run the app and the db in a containerized fashion. You need to
+set the database config variables and the csv path as well. However the app will be pretty slow in a mac OS container
+'cause of the file system and other complications. So I would suggest to run it in linux if you are planning to run it in 
+a container otherwise run it bare. 
+The entire parsing and insertion took about 450 seconds on a containerized app on MAC OS which is around 30 times slower than
+non containerized in the same app.
 
 To start your Phoenix server:
 
@@ -59,10 +68,13 @@ To start your Phoenix server:
   * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
 How to use the app:
-1. First set the environment variable `CSV_PATH` where the csv file is actually present.
+1. First set the environment variable `CSV_PATH` and database config variables - `USER_NAME`, `PASSWORD`, `DATABASE` and `HOSTNAME` where the csv file is actually present.
 2. Start parsing using `Geolocation.Parse.init_parse/0`.
 3. Fetch ip details using the api `/geo_data?ip_address=<IP_ADDRESS>`.
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+
+To run it in container fashion set the above environment variables and run `docker-compose build` followed by `docker-compose up`.
+
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
