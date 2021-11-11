@@ -6,4 +6,3 @@ services:
       context: .
     environment:
       - CSV_PATH=/Users/mukul/Downloads/data_dump.csv
-    # network_mode: "host"
