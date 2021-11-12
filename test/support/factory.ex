@@ -1,6 +1,6 @@
 defmodule Geolocation.Factory do
   use ExMachina.Ecto, repo: Geolocation.Repo
-
+  @moduledoc false
   def geo_data_factory(params) do
     %Geolocation.Schema.GeoData{
       ip_address: params.ip_address,
