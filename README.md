@@ -75,12 +75,12 @@ How to use the app:
 1. First set the environment variable `CSV_PATH` and database config variables - `USER_NAME`, `PASSWORD`, `DATABASE` and `HOSTNAME` where the csv file is actually present.
 2. Start parsing using `Geolocation.Parser.init_parse/0`.
 3. Fetch ip details using the api `/geo_data?ip_address=<IP_ADDRESS>`.
-4. To start parsing from the command line use `mix run -e Geolocation.Parse.init_parse`.
+4. To start parsing from the command line use `mix run -e Geolocation.Parser.init_parse`.
 
 
 To run it in container fashion set the above environment variables and run `docker-compose build` followed by `docker-compose up`.
 
-To access the api in cloude server use `http://64.227.190.138:4000/geo_data?ip_address=<IP_ADDRESS>`
+To access the api in cloud server use `http://64.227.190.138:4000/geo_data?ip_address=<IP_ADDRESS>`
 
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
