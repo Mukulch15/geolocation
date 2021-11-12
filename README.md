@@ -79,6 +79,7 @@ How to use the app:
 
 To run it in container fashion set the above environment variables and run `docker-compose build` followed by `docker-compose up`.
 
+To access the api in cloude server use `http://64.227.190.138:4000/geo_data?ip_address=<IP_ADDRESS>`
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
