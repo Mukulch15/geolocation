@@ -1,4 +1,4 @@
-defmodule Geolocation.Parse do
+defmodule Geolocation.Parser do
   alias Geolocation.EtsOwnerServer
   alias Geolocation.Schema.GeoData
 

@@ -73,7 +73,7 @@ To start your Phoenix server:
 
 How to use the app:
 1. First set the environment variable `CSV_PATH` and database config variables - `USER_NAME`, `PASSWORD`, `DATABASE` and `HOSTNAME` where the csv file is actually present.
-2. Start parsing using `Geolocation.Parse.init_parse/0`.
+2. Start parsing using `Geolocation.Parser.init_parse/0`.
 3. Fetch ip details using the api `/geo_data?ip_address=<IP_ADDRESS>`.
 
 
