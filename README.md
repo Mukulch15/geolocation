@@ -1,7 +1,8 @@
 # Geolocation
 This application parses csv data consisting of ip and their geo data and also exposes an api to get the location data using ip address.
 I have used flow library to process the csv files and insert the data into db.
-Initially I thought of using tasks to get the required parallelism but had to move to flow because of the following reasons.
+Initially I thought of using tasks to get the required parallelism but had to move to flow because of the following reasons:
+
 Flow allows us to divide the work into multiple stages wherein the data will be processed parallely according to available cores. Even though tasks allow us to parallelize any unit of work, but then it will lead to additional boiler plates 'cause 
 flow provided us with useful abstractions over genstage(like batching etc) that allows us to focus more on the logic and less on boiler plate.
 
@@ -12,7 +13,7 @@ I also had broadway in mind but that would have been an overkill, since we are n
 and are focussed more on data processing.
 For csv parsing I initially considered the CSV module. However when I benchmarked it with nimble_csv, nimble_csv was the clear
 winner with massive performance which further increased when I fed the resulting stream to flow.
-Initial benchmarks (CSV vs nimble_csv) Both use flow for stream processing:
+Initial benchmarks (CSV vs nimble_csv) for 10^6 rows. Both use flow for stream processing:
 
 Code for csv:
 ```elixir
@@ -54,26 +55,27 @@ Average time taken using task: 2.8 seconds.
 A chunk size of 10000 was found to be the sweet spot.
 
 Hence it was decided that flow along with nimble_csv will not only result in performant code but more understandable as well. 
-After including db insertions the entire flow took around 12-14 seconds.
+After including db insertions the entire flow took around 14-17 seconds.
 
 I have included a dockerfile and docker-compose file to run the app and the db in a containerized fashion. You need to
 set the database config variables and the csv path as well. However the app will be pretty slow in a mac OS container
 'cause of the file system and other complications. So I would suggest to run it in linux if you are planning to run it in 
 a container otherwise run it bare. 
 The entire parsing and insertion took about 450 seconds on a containerized app on MAC OS which is around 30 times slower than
-non containerized in the same app.
+non containerized in the same machine even after using `:cached` optimization for volumes in mac.
 
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`
   * Create and migrate your database with `mix ecto.setup`
   * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+  * Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 How to use the app:
 1. First set the environment variable `CSV_PATH` and database config variables - `USER_NAME`, `PASSWORD`, `DATABASE` and `HOSTNAME` where the csv file is actually present.
 2. Start parsing using `Geolocation.Parse.init_parse/0`.
 3. Fetch ip details using the api `/geo_data?ip_address=<IP_ADDRESS>`.
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+
 
 To run it in container fashion set the above environment variables and run `docker-compose build` followed by `docker-compose up`.
 

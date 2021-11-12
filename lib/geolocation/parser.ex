@@ -13,11 +13,13 @@ defmodule Geolocation.Parse do
   fed to flow and afterwards to different functions for processing.
   3. filter_ips/1 functions takes the flow and filters out the ip addresses that are invalid. It also increments the counter for ip
   addresses that got rejected.
-  4. create_structs/1 function takes the flow and converts the emty string values in each row into nil and creates a map for each row
+  4. create_structs/1 function takes the flow and converts the empty string values in each row into nil and creates a map for each row
   for batch inserts in the later stages.
   5. remove_nil_rows/1 function takes the flow and removes all the nil rows from the previous step.
   6. combine_results/1 consists of reduce function that takes a window of 2000 rows and converts them into a single list
   of 2000 entries and passes them into the Flow.on_trigger/2 which inserts them as a batch for performance.
+  Ets is used a cache for ip_addresses so that it comes faster to filter diplicate ips_addresses. It also serves as a counter
+  for accepted and rejected entries so that we don't have to call the db to fetch the counts.
   """
   alias NimbleCSV.RFC4180
 
@@ -127,7 +129,7 @@ defmodule Geolocation.Parse do
     case changeset do
       %Ecto.Changeset{valid?: true} ->
         changes = changeset.changes
-        GenServer.call(EtsOwnerServer, {:insert_ip, changes["ip_address"], 0})
+        GenServer.call(EtsOwnerServer, {:insert_ip, changes.ip_address, 0})
         GenServer.call(EtsOwnerServer, :incr_accepted)
         changes
 

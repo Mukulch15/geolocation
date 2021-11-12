@@ -5,11 +5,7 @@ defmodule Geolocation do
   import Ecto.Query
 
   @moduledoc """
-  Geolocation keeps the contexts that define your domain
-  and business logic.
-
-  Contexts are also responsible for managing your data, regardless
-  if it comes from the database, an external API or others.
+    This module consists of functions that fetch data from the database.
   """
   def get_deo_data(ip_address) do
     try do
